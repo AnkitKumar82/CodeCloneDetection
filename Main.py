@@ -1,15 +1,9 @@
 import GetFiles
 import Tokenizer
-dirPath = "E:\CPPFiles"
+dirPath = "E:\CPPFiles\Single"
+
+granularity = 1 #Block level can be 0 = (file level) or 1 = (method level)
 
 allFilesData = GetFiles.getAllFilesUsingFolderPath(dirPath)
-# print(allFilesData)
-allFilesTokens = Tokenizer.tokenizeAllFiles(allFilesData)
+allFilesTokens = Tokenizer.tokenizeAllFiles(allFilesData, granularity)
 print(allFilesTokens)
-# for file in allFilesTokens:
-#     for blocks in file:
-#         for block in file[blocks]:
-#             for idx in range(len(block)):
-#                 print("start : ", block['Start'], "end: ", block["End"])
-#                 for code in block["Code"]:
-#                     print(code)

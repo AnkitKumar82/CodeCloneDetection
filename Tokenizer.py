@@ -1,68 +1,115 @@
 import sys
 import os
 import Config
-def tokenizeAllFiles(listOfFiles):
+def tokenizeAllFiles(listOfFiles, granularity):
     allFilesTokens = []
     for filePath in listOfFiles:
-        fileTokens = tokenizeFileMethodLevel(filePath)        
+        if granularity == 1:
+            fileTokens = methodLevelBlocks(filePath)
+        else:
+            fileTokens = fileLevelBlocks(filePath)  
         allFilesTokens.append({filePath : fileTokens})
     return allFilesTokens
-
-def tokenizeFileMethodLevel(filePath) :
-    #This function will take 1 filepath
-    #And return all tokens made from that file
-    #Uses method level
-
+def fileLevelBlocks(filePath):
+    """
+    input : filePath
+    output : blocks using file level
+    """
     allCodeBlocks = []
-    bracketSeen = 0
-    file = open(filePath, "r")
+    commentsRemovedCode = removeCommentsFromCode(filePath)
+    startLine = 1
+    endLine = len(commentsRemovedCode)
+    allCodeBlocks.append({"Start" : startLine, "End" : endLine, "Code" : commentsRemovedCode})
+    return allCodeBlocks   
+
+def methodLevelBlocks(filePath):
+    """
+    input : filepath
+    output : blocks using method level
+    """
+    allCodeBlocks = []
+    bracketStack = 0
+    commentsRemovedCode = removeCommentsFromCode(filePath)
     lineNumber = 0
     startLine = -1
     endLine = -1
     currentCodeBlock = []
-    inString = False
-    inComment = False
-    for line in file.readlines():
+    quote = False
+    for line in commentsRemovedCode:
         lineNumber += 1
-        # Get next line from file
         line = line.strip()
-        # if line is empty
-        # end of file is reached
-        if line.startswith("//") :
-            continue
         currentCodeBlock.append(line)
         if not line:
             continue
-        currLineEffectiveStart = 0
-        for idx in range(currLineEffectiveStart, len(line)):
+        for idx in range(0, len(line)):
             char = line[idx]
             if char == "\"":
-                inString = inString ^ True
-            elif inComment == False and inString == False and char =="/" and line[idx + 1] == "*":
-                currentCodeBlock.pop()
-                inComment = True
-            elif inComment == True and inString == False and char == "*" and line[idx + 1] == "/":
-                inComment = False
-                currLineEffectiveStart = idx + 2
-                currentCodeBlock.pop()
-            elif inComment == False and inString == False and char == "/" and line[idx + 1] == "/" : 
-                # Checks if current line contains any comment
-                idx += 1
-                print(idx, line)
-                currentCodeBlock.pop()
-                currentCodeBlock.append(line[currLineEffectiveStart : idx - 1])
-                break
-            if inString == False and inComment == False:
+                quote = quote ^ True
+
+            if quote == False:
                 if char == "{" :
-                    bracketSeen += 1
-                    if bracketSeen == 1:
+                    bracketStack += 1
+                    if bracketStack == 1:
                         startLine = lineNumber
                         currentCodeBlock = [line]
                 elif char == "}" :
-                    bracketSeen += -1
-                    if bracketSeen == 0:
+                    bracketStack += -1
+                    if bracketStack == 0:
                         endLine = lineNumber
                         allCodeBlocks.append({"Start" : startLine, "End" : endLine, "Code" : currentCodeBlock})   
                         break
-    file.close()
     return allCodeBlocks
+
+def removeCommentsFromCode(filePath):
+    """
+    input : filePath
+    output: line by line code without comments 
+    """
+    strippedCode = []
+    quote = 0
+    comment = 0
+    file = open(filePath, "r")
+    for line in file.readlines():
+        line = line.strip()
+        strippedLine = []
+        for idx in range(0, len(line)):
+            ch = line[idx]
+            if ch == '\\':
+                if comment:
+                    continue
+                strippedLine.append(line[idx:idx + 2])
+            elif ch  in ('\"', '\'') :
+                if comment:
+                    continue
+                strippedLine.append(ch)
+                if quote == 0:
+                    quote = ch
+                elif quote == ch:
+                    quote = 0
+            elif ch == '/':
+                if quote:
+                    strippedLine.append(ch)
+                elif idx + 1 < len(line) and line[idx + 1] == '/':
+                    strippedLine.append('\n')
+                    break
+                elif idx + 1 < len(line) and line[idx + 1] == '*':
+                    comment = 1
+                    idx += 1
+                elif comment == 0:
+                    strippedLine.append(line[idx])
+            elif ch == '*':
+                if quote:
+                    strippedLine.append(ch)
+                elif comment == 1 and idx + 1 < len(line) and line[idx + 1] == '/':
+                    comment = 0
+                    idx += 1
+                    continue
+                elif comment == 1:
+                    continue
+                strippedLine.append(line[idx])
+            else:
+                if comment == 0:
+                    strippedLine.append(ch)
+        strippedCode.append(''.join(strippedLine))
+    file.close()
+    return strippedCode
