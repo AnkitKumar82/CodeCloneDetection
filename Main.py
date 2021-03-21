@@ -1,8 +1,8 @@
 import GetFiles
 import Tokenizer
-dirPath = "E:\CPPFiles\Single"
+dirPath = "E:\CodeFiles\Sample"
 
-granularity = 1 #Block level can be 0 = (file level) or 1 = (method level)
+granularity = 0 #Block level can be 0 = (file level) or 1 = (method level)
 
 allFilesData = GetFiles.getAllFilesUsingFolderPath(dirPath)
 allFilesTokens = Tokenizer.tokenizeAllFiles(allFilesData, granularity)

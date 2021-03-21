@@ -5,7 +5,7 @@ def getAllFilesUsingFolderPath(folderPath):
     if os.path.exists(folderPath):
         fileNames = os.listdir(folderPath)
         for fileName in fileNames:
-            if fileName.split(".")[-1] != "cpp":
+            if fileName.split(".")[-1] != "java":
                 continue
             fileFullPath = os.path.join(folderPath, fileName)
             allFilesInFolder.append(fileFullPath)

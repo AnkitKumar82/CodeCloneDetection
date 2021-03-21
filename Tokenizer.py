@@ -1,20 +1,24 @@
 import sys
 import os
 import Config
+import re
 def tokenizeAllFiles(listOfFiles, granularity):
     allFilesTokens = []
     for filePath in listOfFiles:
+        
         if granularity == 1:
-            fileTokens = methodLevelBlocks(filePath)
+            codeBlocks = methodLevelBlocks(filePath)
         else:
-            fileTokens = fileLevelBlocks(filePath)  
-        allFilesTokens.append({filePath : fileTokens})
+            codeBlocks = fileLevelBlocks(filePath)  
+
+        allFilesTokens.append({filePath : codeBlocks})
     return allFilesTokens
 def fileLevelBlocks(filePath):
     """
     input : filePath
     output : blocks using file level
     """
+
     allCodeBlocks = []
     commentsRemovedCode = removeCommentsFromCode(filePath)
     startLine = 1
@@ -27,6 +31,7 @@ def methodLevelBlocks(filePath):
     input : filepath
     output : blocks using method level
     """
+
     allCodeBlocks = []
     bracketStack = 0
     commentsRemovedCode = removeCommentsFromCode(filePath)
@@ -35,6 +40,7 @@ def methodLevelBlocks(filePath):
     endLine = -1
     currentCodeBlock = []
     quote = False
+
     for line in commentsRemovedCode:
         lineNumber += 1
         line = line.strip()
@@ -63,53 +69,16 @@ def methodLevelBlocks(filePath):
 def removeCommentsFromCode(filePath):
     """
     input : filePath
-    output: line by line code without comments 
+    output : code without comments 
     """
-    strippedCode = []
-    quote = 0
-    comment = 0
     file = open(filePath, "r")
-    for line in file.readlines():
-        line = line.strip()
-        strippedLine = []
-        for idx in range(0, len(line)):
-            ch = line[idx]
-            if ch == '\\':
-                if comment:
-                    continue
-                strippedLine.append(line[idx:idx + 2])
-            elif ch  in ('\"', '\'') :
-                if comment:
-                    continue
-                strippedLine.append(ch)
-                if quote == 0:
-                    quote = ch
-                elif quote == ch:
-                    quote = 0
-            elif ch == '/':
-                if quote:
-                    strippedLine.append(ch)
-                elif idx + 1 < len(line) and line[idx + 1] == '/':
-                    strippedLine.append('\n')
-                    break
-                elif idx + 1 < len(line) and line[idx + 1] == '*':
-                    comment = 1
-                    idx += 1
-                elif comment == 0:
-                    strippedLine.append(line[idx])
-            elif ch == '*':
-                if quote:
-                    strippedLine.append(ch)
-                elif comment == 1 and idx + 1 < len(line) and line[idx + 1] == '/':
-                    comment = 0
-                    idx += 1
-                    continue
-                elif comment == 1:
-                    continue
-                strippedLine.append(line[idx])
-            else:
-                if comment == 0:
-                    strippedLine.append(ch)
-        strippedCode.append(''.join(strippedLine))
+    originalCode = open(filePath, "r").read()
+    pattern = r"(\".*?\"|\'.*?\')|(/\*.*?\*/|//[^\r\n]*$)"
+    regex = re.compile(pattern, re.MULTILINE|re.DOTALL)
+    def _replacer(match):
+        if match.group(2) is not None:
+            return ""
+        else:
+            return match.group(1)
     file.close()
-    return strippedCode
+    return regex.sub(_replacer, originalCode)
