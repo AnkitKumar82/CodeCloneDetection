@@ -72,7 +72,7 @@ def removeCommentsFromCode(filePath):
     output : code without comments 
     """
     file = open(filePath, "r")
-    originalCode = open(filePath, "r").read()
+    originalCode = file.read()
     pattern = r"(\".*?\"|\'.*?\')|(/\*.*?\*/|//[^\r\n]*$)"
     regex = re.compile(pattern, re.MULTILINE|re.DOTALL)
     def _replacer(match):
@@ -81,4 +81,4 @@ def removeCommentsFromCode(filePath):
         else:
             return match.group(1)
     file.close()
-    return regex.sub(_replacer, originalCode)
+    return regex.sub(_replacer, originalCode).split('\n')
