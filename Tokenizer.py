@@ -5,41 +5,37 @@ import re
 def tokenizeAllFiles(listOfFiles, granularity):
     allFilesTokens = []
     for filePath in listOfFiles:
-        
+        file = open(filePath, 'r')
+        originalCode = file.readlines()
+        file.close()
         if granularity == 1:
-            codeBlocks = methodLevelBlocks(filePath)
+            codeBlocks = methodLevelBlocks(originalCode)
         else:
-            codeBlocks = fileLevelBlocks(filePath)  
+            codeBlocks = fileLevelBlocks(originalCode)  
 
         allFilesTokens.append({filePath : codeBlocks})
     return allFilesTokens
-def fileLevelBlocks(filePath):
+def fileLevelBlocks(originalCode):
     """
-    input : filePath
+    input : originalCode
     output : blocks using file level
     """
 
     allCodeBlocks = []
-    file = open(filePath, 'r')
-    originalCode = file.readlines()
-    file.close()
     commentsRemovedCode = removeCommentsFromCode(originalCode)
     startLine = 1
     endLine = len(commentsRemovedCode)
     allCodeBlocks.append({"Start" : startLine, "End" : endLine, "Code" : commentsRemovedCode})
     return allCodeBlocks   
 
-def methodLevelBlocks(filePath):
+def methodLevelBlocks(originalCode):
     """
-    input : filepath
+    input : originalCode
     output : blocks using method level
     """
 
     allCodeBlocks = []
     bracketStack = 0
-    file = open(filePath, 'r')
-    originalCode = file.readlines()
-    file.close()
     commentsRemovedCode = removeCommentsFromCode(originalCode)
     lineNumber = 0
     startLine = -1
@@ -108,5 +104,7 @@ def removeCommentsFromCode(originalCode):
                 continue
             strippedLine += c if mode < 4 else "" 
             idx += 1
+        if len(strippedLine) > 0 and strippedLine[-1] == '\n' :
+            strippedLine = strippedLine[:-1] 
         strippedCode.append(strippedLine)
     return strippedCode
