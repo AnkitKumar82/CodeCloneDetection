@@ -20,7 +20,10 @@ def fileLevelBlocks(filePath):
     """
 
     allCodeBlocks = []
-    commentsRemovedCode = removeCommentsFromCode(filePath)
+    file = open(filePath, 'r')
+    originalCode = file.readlines()
+    file.close()
+    commentsRemovedCode = removeCommentsFromCode(originalCode)
     startLine = 1
     endLine = len(commentsRemovedCode)
     allCodeBlocks.append({"Start" : startLine, "End" : endLine, "Code" : commentsRemovedCode})
@@ -34,7 +37,10 @@ def methodLevelBlocks(filePath):
 
     allCodeBlocks = []
     bracketStack = 0
-    commentsRemovedCode = removeCommentsFromCode(filePath)
+    file = open(filePath, 'r')
+    originalCode = file.readlines()
+    file.close()
+    commentsRemovedCode = removeCommentsFromCode(originalCode)
     lineNumber = 0
     startLine = -1
     endLine = -1
@@ -66,19 +72,41 @@ def methodLevelBlocks(filePath):
                         break
     return allCodeBlocks
 
-def removeCommentsFromCode(filePath):
+def removeCommentsFromCode(originalCode):
     """
-    input : filePath
+    input : original Code
     output : code without comments 
     """
-    file = open(filePath, "r")
-    originalCode = file.read()
-    pattern = r"(\".*?\"|\'.*?\')|(/\*.*?\*/|//[^\r\n]*$)"
-    regex = re.compile(pattern, re.MULTILINE|re.DOTALL)
-    def _replacer(match):
-        if match.group(2) is not None:
-            return ""
-        else:
-            return match.group(1)
-    file.close()
-    return regex.sub(_replacer, originalCode).split('\n')
+    
+    DEFAULT = 1
+    ESCAPE = 2
+    STRING = 3
+    ONE_LINE_COMMENT = 4
+    MULTI_LINE_COMMENT = 5
+
+    mode = DEFAULT
+    strippedCode = []
+    for line in originalCode:
+        strippedLine = ""
+        idx = 0
+        while idx < len(line):
+            subString = line[idx: min(idx + 2, len(line))]
+            c = line[idx]
+            if mode == DEFAULT : 
+                mode = MULTI_LINE_COMMENT if subString == "/*" else ONE_LINE_COMMENT if subString == "//" else STRING if c == '\"' else DEFAULT
+            elif mode == STRING :
+                mode = DEFAULT if c == '\"' else ESCAPE if c == '\\' else STRING
+            elif mode == ESCAPE :
+                mode = STRING
+            elif mode == ONE_LINE_COMMENT :
+                mode = DEFAULT if c == '\n' else ONE_LINE_COMMENT
+                idx += 1
+                continue
+            elif mode == MULTI_LINE_COMMENT :
+                mode = DEFAULT if subString == "*/" else MULTI_LINE_COMMENT
+                idx += 2 if mode == DEFAULT else 1
+                continue
+            strippedLine += c if mode < 4 else "" 
+            idx += 1
+        strippedCode.append(strippedLine)
+    return strippedCode
