@@ -104,7 +104,5 @@ def removeCommentsFromCode(originalCode):
                 continue
             strippedLine += c if mode < 4 else "" 
             idx += 1
-        if len(strippedLine) > 0 and strippedLine[-1] == '\n' :
-            strippedLine = strippedLine[:-1] 
         strippedCode.append(strippedLine)
     return strippedCode
