@@ -1,41 +1,55 @@
 import re
 import Mapping
 import Util
-def detectClone(codeBlocks, threshold = 1, variableAndMethodsThreshold = 1):
+import DataFlowApproach
+
+
+def detectClone(codeBlocks, threshold=1, variableAndMethodsThreshold=1, similarityDataFlowThreshold=1):
     for codeBlockId in codeBlocks:
         codeBlock = codeBlocks[codeBlockId]
-        code = codeBlock['Code']  
-        dict_tokens, dict_variables, dict_methods = getAllTokens(code)   
+        code = codeBlock['Code']
+        dict_tokens, dict_variables, dict_methods = getAllTokens(code)
+        variables_lst = Util.getMostFrequent(
+            dict_variables, variableAndMethodsThreshold)
+        methods_lst = Util.getMostFrequent(
+            dict_methods, variableAndMethodsThreshold)
+
+        variable_scope, method_calls_scope = DataFlowApproach.dataFlowGenerator(
+            code, variables_lst, methods_lst)
+
         codeBlock.update({"Tokens": dict_tokens})
-        codeBlock.update({"Variables": dict_variables})
-        codeBlock.update({"Methods": dict_methods})
-
+        codeBlock.update({"Variables_Scope": variable_scope})
+        codeBlock.update({"Method_Calls_Scope": method_calls_scope})
 
     for codeBlockId in codeBlocks:
         codeBlock = codeBlocks[codeBlockId]
-        
-        tokens = codeBlock["Tokens"]
-        variables = codeBlock["Variables"]
-        methods = codeBlock["Methods"]
 
-        variables_lst = Util.getMostFrequent(variables, variableAndMethodsThreshold)
-        methods_lst = Util.getMostFrequent(methods, variableAndMethodsThreshold)
-        
+        tokens = codeBlock["Tokens"]
+        variable_scope = codeBlock["Variables_Scope"]
+        method_calls_scope = codeBlock["Method_Calls_Scope"]
+
         codeCloneIds = []
-        
+
         for codeCandidateId in codeBlocks:
             if codeCandidateId == codeBlockId:
                 continue
-            
-            simTokens = similarity(tokens, codeBlocks[codeCandidateId]["Tokens"])
+
+            simTokens = similarity(
+                tokens, codeBlocks[codeCandidateId]["Tokens"])
             if simTokens >= threshold:
-                #We will check the control flow of variables here
-                similarityControlFlow = 1
-                
-                codeCloneIds.append({"Similarity" : simTokens, "codeCandidateId" : codeCandidateId})
-        
-        codeBlock.update({"CodeClones" :codeCloneIds})
+                # We will check the control flow of variables here
+                codeCandidateBlock = codeBlocks[codeCandidateId]
+                candidate_variable_scope = codeCandidateBlock["Variables_Scope"]
+                candidate_method_calls_scope = codeCandidateBlock["Method_Calls_Scope"]
+                similarityByDataFlow = DataFlowApproach.getSimilarity(
+                    variable_scope, method_calls_scope, candidate_variable_scope, candidate_method_calls_scope)
+                if similarityByDataFlow > similarityDataFlowThreshold:
+                    codeCloneIds.append(
+                        {"Similarity": simTokens, "codeCandidateId": codeCandidateId})
+
+        codeBlock.update({"CodeClones": codeCloneIds})
     return codeBlocks
+
 
 def getAllTokens(code):
     list_methods = []
@@ -44,35 +58,38 @@ def getAllTokens(code):
     for line in code:
         line = re.sub(r"(\".*?\"|\'.*?\')", " STRING_LITERAL ", line)
         regexPattern = '|'.join(map(re.escape, Mapping.delimiters))
-        list_line = re.sub('(?<=\W|\w)(' + regexPattern + ')', r' \1 ', line).split()
+        list_line = re.sub('(?<=\W|\w)(' + regexPattern + ')',
+                           r' \1 ', line).split()
         list_line = [unit.strip() for unit in list_line if unit.strip() != ""]
-
+        # print(list_line)
 
         for idx in range(len(list_line)):
             unit = list_line[idx].strip()
-            unit = re.sub(r"^[+-]?((\d+(\.\d+)?)|(\.\d+))$", "INTEGER_LITERAL", unit)
+            unit = re.sub(r"^[+-]?((\d+(\.\d+)?)|(\.\d+))$",
+                          "INTEGER_LITERAL", unit)
             if unit in Mapping.symbols:
                 continue
             elif unit in Mapping.keywords.keys():
                 list_tokens.append(Mapping.keywords[unit])
             else:
                 if idx + 1 < len(list_line) and list_line[idx + 1].strip() == '(':
-                    
+
                     list_methodName = unit.split(".")
 
                     list_methods.append(list_methodName[-1])
                     list_tokens.append(list_methodName[-1])
                 else:
                     list_variableName = unit.split('.')
-                    
+
                     list_variables.append(list_variableName[-1])
                     list_tokens.append("TOKEN_VARIABLE")
-    
+
     dict_tokens = Util.getFrequencyFromList(list_tokens)
     dict_variables = Util.getFrequencyFromList(list_variables)
     dict_methods = Util.getFrequencyFromList(list_methods)
-    
-    return dict_tokens, dict_variables, dict_methods 
+
+    return dict_tokens, dict_variables, dict_methods
+
 
 def similarity(Tokens1, Tokens2):
     """
@@ -93,4 +110,3 @@ def similarity(Tokens1, Tokens2):
     for key in Tokens2Keys:
         tokens2 += Tokens2[key]
     return (tokensIntersect)/(tokens1 + tokens2 - tokensIntersect)
-
