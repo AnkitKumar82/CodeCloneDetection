@@ -16,10 +16,6 @@ def detectClone(codeBlocks, threshold=1, variableAndMethodsThreshold=1, similari
 
         variable_scope, method_calls_scope = DataFlowApproach.dataFlowGenerator(
             code, variables_lst, methods_lst)
-        # print(variable_scope)
-        # print("------------------------------------------")
-        # print(method_calls_scope)
-        # print("==========================================")
 
         codeBlock.update({"Tokens": dict_tokens})
         codeBlock.update({"Variables_Scope": variable_scope})

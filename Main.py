@@ -2,7 +2,7 @@ import GetFiles
 import MethodExtractor
 import CloneDetector
 import CloneSave
-dirPath = "F:\8th-Sem-Project\src\examples\Single"
+dirPath = "F:\8th-Sem-Project\src\examples\Sample"
 outputPath = "F:\8th-Sem-Project\src\examples\Sample\output.txt"
 
 # This will be used as level for output into file

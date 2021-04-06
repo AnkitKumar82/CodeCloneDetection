@@ -1,5 +1,6 @@
 import Mapping
 import ControlElementsMapping
+import ParenthesisBalancing
 import re
 threshold = 0.8
 
@@ -14,6 +15,8 @@ def dataFlowGenerator(method_lines, identifiers, method_calls):
     scope_stack, parenthesis_stack = [], []
     level = 0
     scope = "global"
+
+    method_lines = ParenthesisBalancing.parenthesisBalancer(method_lines)
 
     # print(Mapping.delimiters)
     new_delimeters = Mapping.delimiters + ['.']
