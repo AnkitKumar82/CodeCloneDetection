@@ -2,7 +2,7 @@ import GetFiles
 import MethodExtractor
 import CloneDetector
 import CloneSave
-dirPath = "F:\8th-Sem-Project\src\examples\Sample"
+dirPath = "F:\8th-Sem-Project\src\examples\Single"
 outputPath = "F:\8th-Sem-Project\src\examples\Sample\output.txt"
 
 # This will be used as level for output into file
@@ -13,13 +13,13 @@ outputLevel = 2
 
 # Threshhold for considering as code clones
 # Threshhold = 1 for type 2 clones
-threshold = 0.8
+threshold = 0
 
 # Threshold for similarity measure by data flow approach
-similarityControlFlowThreshold = 0.8
+similarityControlFlowThreshold = 0
 
 # Threshold for considering most frequent variables and methods
-variableAndMethodsThreshold = 0.8
+variableAndMethodsThreshold = 0.6
 
 # Block level can be 0 = (file level) or 1 = (method level)
 granularity = 1

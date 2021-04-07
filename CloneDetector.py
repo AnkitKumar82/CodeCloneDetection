@@ -41,9 +41,9 @@ def detectClone(codeBlocks, threshold=1, variableAndMethodsThreshold=1, similari
                 codeCandidateBlock = codeBlocks[codeCandidateId]
                 candidate_variable_scope = codeCandidateBlock["Variables_Scope"]
                 candidate_method_calls_scope = codeCandidateBlock["Method_Calls_Scope"]
-                similarityByDataFlow = DataFlowApproach.getSimilarity(
+                variableSimilarityByDataFlow, methodCallSimilarityByDataFlow = DataFlowApproach.getSimilarity(
                     variable_scope, method_calls_scope, candidate_variable_scope, candidate_method_calls_scope)
-                if similarityByDataFlow > similarityDataFlowThreshold:
+                if variableSimilarityByDataFlow > similarityDataFlowThreshold and methodCallSimilarityByDataFlow > similarityDataFlowThreshold:
                     codeCloneIds.append(
                         {"Similarity": simTokens, "codeCandidateId": codeCandidateId})
 
