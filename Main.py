@@ -16,7 +16,7 @@ outputLevel = 2
 threshold = 0
 
 # Threshold for similarity measure by data flow approach
-similarityControlFlowThreshold = 0
+similarityControlFlowThreshold = 0.5
 
 # Threshold for considering most frequent variables and methods
 variableAndMethodsThreshold = 0.6
