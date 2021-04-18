@@ -2,8 +2,10 @@ import ControlElementsMapping
 
 
 def checkForParenthesis(method_lines, lst_line, i):
+    assert(len(method_lines) > 0)
     if '{' in lst_line:
         return method_lines
+
     else:
         k = i+1
         for next_line in method_lines[i+1:]:
@@ -20,6 +22,7 @@ def checkForParenthesis(method_lines, lst_line, i):
                         method_lines[i] = method_lines[i] + " { "
                         return method_lines
             k += 1
+    return method_lines
 
 
 def parenthesisBalancer(method_lines):

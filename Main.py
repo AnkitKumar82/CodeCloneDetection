@@ -2,7 +2,7 @@ import GetFiles
 import MethodExtractor
 import CloneDetector
 import CloneSave
-dirPath = "F:\8th-Sem-Project\src\examples\Single"
+dirPath = "F:/8th-Sem-Project/BigCloneEval/ijadataset/bcb_reduced/4/selected"
 outputPath = "F:\8th-Sem-Project\src\examples\Sample\output.txt"
 
 # This will be used as level for output into file
@@ -36,4 +36,4 @@ codeBlocks = MethodExtractor.extractMethodsAllFiles(allFilesData, granularity)
 CloneDetector.detectClone(
     codeBlocks, threshold, variableAndMethodsThreshold, similarityControlFlowThreshold)
 
-CloneSave.writeToFile(codeBlocks, outputPath, outputLevel)
+# CloneSave.writeToFile(codeBlocks, outputPath, outputLevel)

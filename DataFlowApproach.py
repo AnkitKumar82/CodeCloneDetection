@@ -19,29 +19,29 @@ def stringMatching(str1, str2):
     return similarity
 
 
-def lcs(num1, num2, m, n):
-    dp = []
-    for _ in range(m+1):
-        dp.append([])
-        for __ in range(n+1):
-            dp[-1].append(0)
+# def lcs(num1, num2, m, n):
+#     dp = []
+#     for _ in range(m+1):
+#         dp.append([])
+#         for __ in range(n+1):
+#             dp[-1].append(0)
 
-    for i in range(m+1):
-        for j in range(n+1):
-            if(i == 0 or j == 0):
-                dp[i][j] = 0
+#     for i in range(m+1):
+#         for j in range(n+1):
+#             if(i == 0 or j == 0):
+#                 dp[i][j] = 0
 
-            elif(num1[i-1] == num2[j-1]):
-                dp[i][j] = dp[i-1][j-1] + 1
+#             elif(num1[i-1] == num2[j-1]):
+#                 dp[i][j] = dp[i-1][j-1] + 1
 
-            else:
-                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+#             else:
+#                 dp[i][j] = max(dp[i-1][j], dp[i][j-1])
 
-    return dp[m][n]
+#     return dp[m][n]
 
 
 def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[]):
-    print(m1_v_scope, m2_v_scope)
+    #m1_v_scope = [["n", "1global 2iteration 1global"], ["temp",]]
     threshold = 0.7
     clone_count_variables, total_count_variables = 0, max(
         len(m1_v_scope), len(m2_v_scope))
@@ -50,8 +50,6 @@ def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[]):
 
     comparison_len_variables = min(len(m1_v_scope), len(m2_v_scope))
     comparison_len_method_calls = min(len(m1_mc_scope), len(m2_mc_scope))
-
-    print(comparison_len_variables, comparison_len_method_calls)
 
     for i in range(comparison_len_variables):
         v_len1 = len(m1_v_scope[i][1].split())
@@ -118,7 +116,7 @@ def dataFlowGenerator(method_lines, identifiers, method_calls):
     level = 0
     scope = "global"
 
-    method_lines = ParenthesisBalancing.parenthesisBalancer(method_lines)
+    #method_lines = ParenthesisBalancing.parenthesisBalancer(method_lines)
 
     # print(Mapping.delimiters)
     new_delimeters = Mapping.delimiters + ['.']
@@ -146,7 +144,8 @@ def dataFlowGenerator(method_lines, identifiers, method_calls):
                 level += 1
 
             if unit == '}':
-                scope_stack.pop()
+                if(len(scope_stack) > 0):
+                    scope_stack.pop()
                 if(len(scope_stack) > 0):
                     scope = scope_stack[-1]
                 parenthesis_stack.pop()
