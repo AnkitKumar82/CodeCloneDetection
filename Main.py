@@ -2,7 +2,7 @@ import GetFiles
 import MethodExtractor
 import CloneDetector
 import CloneSave
-dirPath = "F:\8th-Sem-Project\src\examples\Single"
+dirPath = "F:/8th-Sem-Project/BigCloneEval/ijadataset/bcb_reduced/4/selected"
 outputPath = "F:\8th-Sem-Project\src\examples\Sample\output.txt"
 
 # This will be used as level for output into file
@@ -16,7 +16,7 @@ outputLevel = 2
 threshold = 0
 
 # Threshold for similarity measure by data flow approach
-similarityControlFlowThreshold = 0
+similarityControlFlowThreshold = 0.5
 
 # Threshold for considering most frequent variables and methods
 variableAndMethodsThreshold = 0.6
@@ -36,4 +36,4 @@ codeBlocks = MethodExtractor.extractMethodsAllFiles(allFilesData, granularity)
 CloneDetector.detectClone(
     codeBlocks, threshold, variableAndMethodsThreshold, similarityControlFlowThreshold)
 
-CloneSave.writeToFile(codeBlocks, outputPath, outputLevel)
+# CloneSave.writeToFile(codeBlocks, outputPath, outputLevel)

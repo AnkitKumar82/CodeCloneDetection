@@ -14,8 +14,8 @@ def detectClone(codeBlocks, threshold=1, variableAndMethodsThreshold=1, similari
         methods_lst = Util.getMostFrequent(
             dict_methods, variableAndMethodsThreshold)
 
-        variable_scope, method_calls_scope = DataFlowApproach.dataFlowGenerator(
-            code, variables_lst, methods_lst)
+        variable_scope, method_calls_scope = [], []  # DataFlowApproach.dataFlowGenerator(
+        # code, variables_lst, methods_lst)
 
         codeBlock.update({"Tokens": dict_tokens})
         codeBlock.update({"Variables_Scope": variable_scope})
@@ -41,8 +41,9 @@ def detectClone(codeBlocks, threshold=1, variableAndMethodsThreshold=1, similari
                 codeCandidateBlock = codeBlocks[codeCandidateId]
                 candidate_variable_scope = codeCandidateBlock["Variables_Scope"]
                 candidate_method_calls_scope = codeCandidateBlock["Method_Calls_Scope"]
-                variableSimilarityByDataFlow, methodCallSimilarityByDataFlow = DataFlowApproach.getSimilarity(
-                    variable_scope, method_calls_scope, candidate_variable_scope, candidate_method_calls_scope)
+                # DataFlowApproach.getSimilarity(
+                variableSimilarityByDataFlow, methodCallSimilarityByDataFlow = 1, 1
+                # variable_scope, method_calls_scope, candidate_variable_scope, candidate_method_calls_scope)
                 if variableSimilarityByDataFlow > similarityDataFlowThreshold and methodCallSimilarityByDataFlow > similarityDataFlowThreshold:
                     codeCloneIds.append(
                         {"Similarity": simTokens, "codeCandidateId": codeCandidateId})

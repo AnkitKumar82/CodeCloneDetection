@@ -16,7 +16,11 @@ def extractMethodsAllFiles(listOfFiles, granularity):
             codeBlocks = methodLevelBlocks(originalCode)
         else:
             codeBlocks = fileLevelBlocks(originalCode)
+        if len(codeBlocks) == 0:
+            continue
         for codeBlock in codeBlocks:
+            if len(codeBlock) == 0:
+                continue
             codeBlock.update({"FileInfo": filePath})
             blocksSoFar += 1
             allFilesMethodsBlocks["CodeBlock" + str(blocksSoFar)] = codeBlock
@@ -49,6 +53,8 @@ def methodLevelBlocks(originalCode):
     output = GetFunctions.method_extractor(codeInSingleLine)
 
     allCodeBlocks = []
+    if output[0] == None:
+        return allCodeBlocks
     for i in range(len(output[0])):
         allCodeBlocks.append(
             {"Start": output[0][i][0], "End": output[0][i][1], "Code": output[1][i].split('\n')})

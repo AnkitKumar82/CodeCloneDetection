@@ -1,9 +1,11 @@
 import os
 import sys
+
+
 def getAllFilesUsingFolderPath(folderPath):
     allFilesInFolder = []
     fileCount = 0
-    maxCount = 100
+    maxCount = 1000
     if os.path.exists(folderPath):
         fileNames = os.listdir(folderPath)
         for fileName in fileNames:
