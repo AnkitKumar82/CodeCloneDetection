@@ -7,5 +7,5 @@ STRING_LITERAL INTEGER_LITERAL
 """.split()
 # mapping = { keywordsList[i] : "TOKEN" + str(i) for i in range(0, len(keywordsList) ) }
 keywords = { keywordsList[i] : keywordsList[i] for i in range(0, len(keywordsList) ) }
-symbols = ["","+", "-", "*", "/"," ", "{" , "}" , ";" , ":", ".", "\t", "\n", ",", "(", ")", "[", "]", "=", ">", "<", " "]
-delimiters = ["+", "-", "*", "/", "{" , "}" , ";" , "\t" , ":", ",", "(", ")", "[", "]", "=", ">", "<"]
+symbols = ["","+", "-", "*", "/"," ", "{" , "}" , ";" , ":", ".", "\t", "\n", ",", "(", ")", "[", "]", "=", ">", "<", " ", "!", "\\"]
+delimiters = ["+", "-", "*", "/", "{" , "}" , ";" , "\t" , ":", ",", "(", ")", "[", "]", "=", ">", "<", "!" , "\\"]

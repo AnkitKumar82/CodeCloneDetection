@@ -2,38 +2,16 @@ import GetFiles
 import MethodExtractor
 import CloneDetector
 import CloneSave
-dirPath = "F:/8th-Sem-Project/BigCloneEval/ijadataset/bcb_reduced/4/selected"
-outputPath = "F:\8th-Sem-Project\src\examples\Sample\output.txt"
-
-# This will be used as level for output into file
-# 0 means everything
-# 1 means current block's code and only clone blocks info
-# 2 means only current block's and clone block's info
-outputLevel = 2
-
-# Threshhold for considering as code clones
-# Threshhold = 1 for type 2 clones
-threshold = 0
-
-# Threshold for similarity measure by data flow approach
-similarityControlFlowThreshold = 0.5
-
-# Threshold for considering most frequent variables and methods
-variableAndMethodsThreshold = 0.6
-
-# Block level can be 0 = (file level) or 1 = (method level)
-granularity = 1
-
 
 # allFilesData is list which have all files with specific extension
-allFilesData = GetFiles.getAllFilesUsingFolderPath(dirPath)
-
-
-codeBlocks = MethodExtractor.extractMethodsAllFiles(allFilesData, granularity)
+print("Getting all file info from folder")
+allFilesData = GetFiles.getAllFilesUsingFolderPath()
+print("Extracting methods from files")
+codeBlocks = MethodExtractor.extractMethodsAllFiles(allFilesData)
 # codeBlocksWithClonePairsType1 = TypeOneDetector.detectClone(allFilesMethods)
 # print(codeBlocksWithClonePairsType1)
-
-CloneDetector.detectClone(
-    codeBlocks, threshold, variableAndMethodsThreshold, similarityControlFlowThreshold)
-
-# CloneSave.writeToFile(codeBlocks, outputPath, outputLevel)
+print("Detecting clones")
+CloneDetector.detectClone(codeBlocks)
+print("Saving to CSV")
+# CloneSave.writeToFile(codeBlocks)
+CloneSave.writeToCSV(codeBlocks)

@@ -4,7 +4,7 @@ import ParenthesisBalancing
 import re
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
-
+import Config
 
 def stringMatching(str1, str2):
     # str1, str2 = "", ""
@@ -15,7 +15,7 @@ def stringMatching(str1, str2):
     #     str2 += ele
 
     similarity = fuzz.ratio(str1, str2)
-    print(str1, str2, similarity)
+    # print(str1, str2, similarity)
     return similarity
 
 
@@ -42,7 +42,7 @@ def stringMatching(str1, str2):
 
 def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[]):
     #m1_v_scope = [["n", "1global 2iteration 1global"], ["temp",]]
-    threshold = 0.7
+    dataFlowSimilaritythreshold = 0.6
     clone_count_variables, total_count_variables = 0, max(
         len(m1_v_scope), len(m2_v_scope))
     clone_count_method_calls, total_count_method_calls = 0, max(
@@ -51,72 +51,64 @@ def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[]):
     comparison_len_variables = min(len(m1_v_scope), len(m2_v_scope))
     comparison_len_method_calls = min(len(m1_mc_scope), len(m2_mc_scope))
 
-    for i in range(comparison_len_variables):
+    i = 0
+    j = 0
+    while i < len(m1_v_scope) and j < len(m2_v_scope):
         v_len1 = len(m1_v_scope[i][1].split())
-        v_len2 = len(m2_v_scope[i][1].split())
+        v_len2 = len(m2_v_scope[j][1].split())
 
-        if min(v_len1, v_len2) / max(v_len1, v_len2) >= threshold:
-            # v1_scope_str, v2_scope_str = [], []
+        if min(v_len1, v_len2) / max(v_len1, v_len2) >= Config.dataFlowSimilaritythreshold:
+            similarity = stringMatching(m1_v_scope[i][1], m2_v_scope[j][1])
 
-            # for scope in m1_v_scope[i][1]:
-            #     v1_scope_list.append(str(scope[0]) + str(scope[1]))
-
-            # for scope in m2_v_scope[i][1]:
-            #     v2_scope_list.append(str(scope[0]) + str(scope[1]))
-
-            # lcs_length = lcs(v1_scope_list, v2_scope_list,
-            #                  len(v1_scope_list), len(v2_scope_list))
-            # # [["num1", [[1, "I"], [2, "S"]]], ["num2", [[1]]]]
-            # similarity = lcs_length/max(v_len1, v_len2)
-
-            print(m1_v_scope[i][0], m2_v_scope[i][0])
-            similarity = stringMatching(m1_v_scope[i][1], m2_v_scope[i][1])
-
-            if(similarity >= threshold):
+            if(similarity >= Config.dataFlowSimilaritythreshold):
                 clone_count_variables += 1
+            
+            i += 1
+            j += 1
+        elif v_len1 > v_len2 :
+            i += 1
+        else:
+            j += 1
 
-    for i in range(comparison_len_method_calls):
+    i = 0
+    j = 0
+    while i < len(m1_mc_scope) and j < len(m2_mc_scope):
+   
         mc_len1 = len(m1_mc_scope[i][1].split())
-        mc_len2 = len(m2_mc_scope[i][1].split())
+        mc_len2 = len(m2_mc_scope[j][1].split())
 
-        if min(mc_len1, mc_len2) / max(mc_len1, mc_len2) >= threshold:
-            # mc1_scope_list, mc2_scope_list = [], []
+        if min(mc_len1, mc_len2) / max(mc_len1, mc_len2) >= Config.dataFlowSimilaritythreshold:
 
-            # for scope in m1_mc_scope[i][1]:
-            #     mc1_scope_list.append(str(scope[0]) + str(scope[1]))
+            similarity = stringMatching(m1_mc_scope[i][1], m2_mc_scope[j][1])
 
-            # for scope in m2_mc_scope[i][1]:
-            #     mc2_scope_list.append(str(scope[0]) + str(scope[1]))
-
-            # lcs_length = lcs(mc1_scope_list, mc2_scope_list,
-            #                  len(mc1_scope_list), len(mc2_scope_list))
-
-            # similarity = lcs_length/max(mc_len1, mc_len2)
-
-            print(m1_mc_scope[i][0], m2_mc_scope[i][0])
-            similarity = stringMatching(m1_mc_scope[i][1], m2_mc_scope[i][1])
-
-            if similarity >= threshold:
+            if similarity >= Config.dataFlowSimilaritythreshold:
                 clone_count_method_calls += 1
+            i += 1
+            j += 1
+        elif mc_len1 > mc_len2 :
+            i += 1
+        else:
+            j += 1
+ 
 
-    print(clone_count_variables / total_count_variables,
-          clone_count_method_calls / total_count_method_calls)
+    similarityVariables = clone_count_variables / total_count_variables if total_count_variables != 0 else 1
+    similarityMethods = clone_count_method_calls / total_count_method_calls if total_count_method_calls != 0 else 1
 
-    return clone_count_variables / total_count_variables, clone_count_method_calls / total_count_method_calls
+    return similarityVariables, similarityMethods
 
 
 def dataFlowGenerator(method_lines, identifiers, method_calls):
     identifier_scope = [[] for _ in range(len(identifiers))]
     method_calls_scope = [[] for _ in range(len(method_calls))]
 
-    print(identifiers)
-    print(method_calls)
+    # print(identifiers)
+    # print(method_calls)
 
     scope_stack, parenthesis_stack = [], []
     level = 0
     scope = "global"
 
-    #method_lines = ParenthesisBalancing.parenthesisBalancer(method_lines)
+    method_lines = ParenthesisBalancing.parenthesisBalancer(method_lines)
 
     # print(Mapping.delimiters)
     new_delimeters = Mapping.delimiters + ['.']

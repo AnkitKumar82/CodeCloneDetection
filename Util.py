@@ -17,5 +17,7 @@ def getMostFrequent(dict_freq, threshold=1):
         dict_freq.items(), key=lambda kv: kv[1], reverse=True)
     lst_token = []
     for idx in range(math.ceil(len(lst_token_freq)*threshold)):
+        if idx >= len(lst_token_freq):
+            break
         lst_token.append(lst_token_freq[idx][0])
     return lst_token

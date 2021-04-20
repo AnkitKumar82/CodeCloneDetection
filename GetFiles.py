@@ -1,8 +1,8 @@
 import os
 import sys
-
-
-def getAllFilesUsingFolderPath(folderPath):
+import Config
+def getAllFilesUsingFolderPath():
+    folderPath = Config.dirPath
     allFilesInFolder = []
     fileCount = 0
     maxCount = 1000

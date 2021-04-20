@@ -5,14 +5,14 @@ import re
 import GetFunctions
 
 
-def extractMethodsAllFiles(listOfFiles, granularity):
+def extractMethodsAllFiles(listOfFiles):
     allFilesMethodsBlocks = {}
     blocksSoFar = 0
     for filePath in listOfFiles:
         file = open(filePath, 'r', encoding='utf-8')
         originalCode = file.readlines()
         file.close()
-        if granularity == 1:
+        if Config.granularity == 1:
             codeBlocks = methodLevelBlocks(originalCode)
         else:
             codeBlocks = fileLevelBlocks(originalCode)
@@ -56,10 +56,10 @@ def methodLevelBlocks(originalCode):
     if output[0] == None:
         return allCodeBlocks
     for i in range(len(output[0])):
+        if abs(output[0][i][1] - output[0][i][0]) < Config.minimumLengthBlock - 1:
+            continue
         allCodeBlocks.append(
             {"Start": output[0][i][0], "End": output[0][i][1], "Code": output[1][i].split('\n')})
-        # print("==================================================")
-        # print(output[1][i])
 
     return allCodeBlocks
 

@@ -2,20 +2,20 @@ import re
 import Mapping
 import Util
 import DataFlowApproach
+import Config
 
-
-def detectClone(codeBlocks, threshold=1, variableAndMethodsThreshold=1, similarityDataFlowThreshold=1):
+def detectClone(codeBlocks):
     for codeBlockId in codeBlocks:
         codeBlock = codeBlocks[codeBlockId]
         code = codeBlock['Code']
         dict_tokens, dict_variables, dict_methods = getAllTokens(code)
         variables_lst = Util.getMostFrequent(
-            dict_variables, variableAndMethodsThreshold)
+            dict_variables, Config.variableAndMethodsThreshold)
         methods_lst = Util.getMostFrequent(
-            dict_methods, variableAndMethodsThreshold)
+            dict_methods, Config.variableAndMethodsThreshold)
 
-        variable_scope, method_calls_scope = [], []  # DataFlowApproach.dataFlowGenerator(
-        # code, variables_lst, methods_lst)
+        variable_scope, method_calls_scope = DataFlowApproach.dataFlowGenerator(
+        code, variables_lst, methods_lst)
 
         codeBlock.update({"Tokens": dict_tokens})
         codeBlock.update({"Variables_Scope": variable_scope})
@@ -36,17 +36,16 @@ def detectClone(codeBlocks, threshold=1, variableAndMethodsThreshold=1, similari
 
             simTokens = similarity(
                 tokens, codeBlocks[codeCandidateId]["Tokens"])
-            if simTokens >= threshold:
+            if simTokens >= Config.tokenSimilarityThreshold:
                 # We will check the control flow of variables here
                 codeCandidateBlock = codeBlocks[codeCandidateId]
                 candidate_variable_scope = codeCandidateBlock["Variables_Scope"]
                 candidate_method_calls_scope = codeCandidateBlock["Method_Calls_Scope"]
-                # DataFlowApproach.getSimilarity(
-                variableSimilarityByDataFlow, methodCallSimilarityByDataFlow = 1, 1
-                # variable_scope, method_calls_scope, candidate_variable_scope, candidate_method_calls_scope)
-                if variableSimilarityByDataFlow > similarityDataFlowThreshold and methodCallSimilarityByDataFlow > similarityDataFlowThreshold:
+                variableSimilarityByDataFlow, methodCallSimilarityByDataFlow = DataFlowApproach.getSimilarity(
+                    variable_scope, method_calls_scope, candidate_variable_scope, candidate_method_calls_scope)
+                if variableSimilarityByDataFlow >= Config.similarityDataFlowThreshold and methodCallSimilarityByDataFlow >= Config.similarityDataFlowThreshold:
                     codeCloneIds.append(
-                        {"Similarity": simTokens, "codeCandidateId": codeCandidateId})
+                        {"Similarity": [simTokens, variableSimilarityByDataFlow, methodCallSimilarityByDataFlow], "codeCandidateId": codeCandidateId})
 
         codeBlock.update({"CodeClones": codeCloneIds})
     return codeBlocks
@@ -78,7 +77,10 @@ def getAllTokens(code):
                     list_methodName = unit.split(".")
 
                     list_methods.append(list_methodName[-1])
+
                     list_tokens.append(list_methodName[-1])
+                    # list_tokens.append("TOKEN_METHOD")
+
                 else:
                     list_variableName = unit.split('.')
 

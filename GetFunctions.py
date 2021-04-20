@@ -5,14 +5,14 @@ import javalang
 import logging
 import traceback
 import itertools
-import GetFiles
+
+global found_parent
 
 try:
     from configparser import ConfigParser
 except ImportError:
     from ConfigParser import ConfigParser  # ver. < 3.0
 
-global found_parent
 
 re_string = re.escape("\"") + '.*?' + re.escape("\"")
 
