@@ -1,11 +1,13 @@
 import os
 import sys
 import Config
+
+
 def getAllFilesUsingFolderPath():
     folderPath = Config.dirPath
     allFilesInFolder = []
     fileCount = 0
-    maxCount = 1000
+    maxCount = 100
     if os.path.exists(folderPath):
         fileNames = os.listdir(folderPath)
         for fileName in fileNames:

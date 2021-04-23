@@ -4,19 +4,28 @@ import Util
 import DataFlowApproach
 import Config
 
+
 def detectClone(codeBlocks):
     for codeBlockId in codeBlocks:
         codeBlock = codeBlocks[codeBlockId]
         code = codeBlock['Code']
         dict_tokens, dict_variables, dict_methods = getAllTokens(code)
+
+        # print("dict_v ", dict_variables)
+        # print("dict_mc", dict_methods)
+        # print("dict_t", dict_tokens)
         variables_lst = Util.getMostFrequent(
             dict_variables, Config.variableAndMethodsThreshold)
         methods_lst = Util.getMostFrequent(
             dict_methods, Config.variableAndMethodsThreshold)
 
+        # print("identifiers ", variables_lst)
+        # print("methods ", methods_lst)
         variable_scope, method_calls_scope = DataFlowApproach.dataFlowGenerator(
-        code, variables_lst, methods_lst)
+            code, variables_lst, methods_lst, [codeBlock['FileInfo'], codeBlock['Start'], codeBlock['End']])
 
+        # print("VC", variable_scope)
+        # print("MCS ", method_calls_scope)
         codeBlock.update({"Tokens": dict_tokens})
         codeBlock.update({"Variables_Scope": variable_scope})
         codeBlock.update({"Method_Calls_Scope": method_calls_scope})
@@ -41,8 +50,14 @@ def detectClone(codeBlocks):
                 codeCandidateBlock = codeBlocks[codeCandidateId]
                 candidate_variable_scope = codeCandidateBlock["Variables_Scope"]
                 candidate_method_calls_scope = codeCandidateBlock["Method_Calls_Scope"]
+                # print("Variables Scope", variable_scope)
+                # print("Methods Calls Scope", method_calls_scope)
+                # print("Candidate vC", candidate_variable_scope)
+                # print("Can MC", candidate_method_calls_scope)
                 variableSimilarityByDataFlow, methodCallSimilarityByDataFlow = DataFlowApproach.getSimilarity(
-                    variable_scope, method_calls_scope, candidate_variable_scope, candidate_method_calls_scope)
+                    variable_scope, method_calls_scope, candidate_variable_scope, candidate_method_calls_scope,
+                    [codeBlock['FileInfo'], codeBlock['Start'], codeBlock['End'],
+                     codeCandidateBlock['FileInfo'], codeCandidateBlock['Start'], codeCandidateBlock['End']])
                 if variableSimilarityByDataFlow >= Config.similarityDataFlowThreshold and methodCallSimilarityByDataFlow >= Config.similarityDataFlowThreshold:
                     codeCloneIds.append(
                         {"Similarity": [simTokens, variableSimilarityByDataFlow, methodCallSimilarityByDataFlow], "codeCandidateId": codeCandidateId})
@@ -65,7 +80,7 @@ def getAllTokens(code):
 
         for idx in range(len(list_line)):
             unit = list_line[idx].strip()
-            unit = re.sub(r"^[+-]?((\d+(\.\d+)?)|(\.\d+))$",
+            unit = re.sub(r"^[+-]?((\d*(\.\d*)?)|(\.\d*))$",
                           "INTEGER_LITERAL", unit)
             if unit in Mapping.symbols:
                 continue
@@ -83,6 +98,7 @@ def getAllTokens(code):
 
                 else:
                     list_variableName = unit.split('.')
+                    # print(list_variableName)
 
                     list_variables.append(list_variableName[-1])
                     list_tokens.append("TOKEN_VARIABLE")
