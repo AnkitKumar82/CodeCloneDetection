@@ -6,6 +6,7 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import Config
 
+
 def stringMatching(str1, str2):
     # str1, str2 = "", ""
 
@@ -40,7 +41,7 @@ def stringMatching(str1, str2):
 #     return dp[m][n]
 
 
-def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[]):
+def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[], clonesInfo=[]):
     #m1_v_scope = [["n", "1global 2iteration 1global"], ["temp",]]
     dataFlowSimilaritythreshold = 0.6
     clone_count_variables, total_count_variables = 0, max(
@@ -57,15 +58,20 @@ def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[]):
         v_len1 = len(m1_v_scope[i][1].split())
         v_len2 = len(m2_v_scope[j][1].split())
 
+        # if(v_len1 == 0 or v_len2 == 0):
+        # [["temp", "1global 2selection"]]
+        # print("Variable 1 ", m1_v_scope[i])
+        # print("Variable 2 ", m2_v_scope[j])
+        # print("Clones Info ", clonesInfo)
         if min(v_len1, v_len2) / max(v_len1, v_len2) >= Config.dataFlowSimilaritythreshold:
             similarity = stringMatching(m1_v_scope[i][1], m2_v_scope[j][1])
 
             if(similarity >= Config.dataFlowSimilaritythreshold):
                 clone_count_variables += 1
-            
+
             i += 1
             j += 1
-        elif v_len1 > v_len2 :
+        elif v_len1 > v_len2:
             i += 1
         else:
             j += 1
@@ -73,43 +79,44 @@ def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[]):
     i = 0
     j = 0
     while i < len(m1_mc_scope) and j < len(m2_mc_scope):
-   
+
         mc_len1 = len(m1_mc_scope[i][1].split())
         mc_len2 = len(m2_mc_scope[j][1].split())
 
         if min(mc_len1, mc_len2) / max(mc_len1, mc_len2) >= Config.dataFlowSimilaritythreshold:
-
             similarity = stringMatching(m1_mc_scope[i][1], m2_mc_scope[j][1])
 
             if similarity >= Config.dataFlowSimilaritythreshold:
                 clone_count_method_calls += 1
             i += 1
             j += 1
-        elif mc_len1 > mc_len2 :
+        elif mc_len1 > mc_len2:
             i += 1
         else:
             j += 1
- 
 
-    similarityVariables = clone_count_variables / total_count_variables if total_count_variables != 0 else 1
-    similarityMethods = clone_count_method_calls / total_count_method_calls if total_count_method_calls != 0 else 1
+    similarityVariables = clone_count_variables / \
+        total_count_variables if total_count_variables != 0 else 1
+    similarityMethods = clone_count_method_calls / \
+        total_count_method_calls if total_count_method_calls != 0 else 1
 
     return similarityVariables, similarityMethods
 
 
-def dataFlowGenerator(method_lines, identifiers, method_calls):
-    identifier_scope = [[] for _ in range(len(identifiers))]
-    method_calls_scope = [[] for _ in range(len(method_calls))]
+def dataFlowGenerator(method_lines, identifiers, method_calls, file_info):
+    #print("identfiers ", identifiers)
+    identifier_scope = [[identifiers[i], ""] for i in range(len(identifiers))]
+    method_calls_scope = [[method_calls[i], ""]
+                          for i in range(len(method_calls))]
 
-    # print(identifiers)
-    # print(method_calls)
+    assert(len(identifiers) == len(identifier_scope))
+    assert(len(method_calls) == len(method_calls_scope))
 
     scope_stack, parenthesis_stack = [], []
     level = 0
     scope = "global"
 
     method_lines = ParenthesisBalancing.parenthesisBalancer(method_lines)
-
     # print(Mapping.delimiters)
     new_delimeters = Mapping.delimiters + ['.']
     # print(new_delimeters)
@@ -122,7 +129,7 @@ def dataFlowGenerator(method_lines, identifiers, method_calls):
 
         for unit in lst_line:
             unit = unit.strip()
-            unit = re.sub(r"^[+-]?((\d+(\.\d+)?)|(\.\d+))$",
+            unit = re.sub(r"^[+-]?((\d*(\.\d*)?)|(\.\d*))$",
                           "INTEGER_LITERAL", unit)
 
             for keyword in ControlElementsMapping.keywords:
@@ -136,35 +143,38 @@ def dataFlowGenerator(method_lines, identifiers, method_calls):
                 level += 1
 
             if unit == '}':
-                if(len(scope_stack) > 0):
+                # print(scope_stack)
+                # print(parenthesis_stack)
+                if(len(scope_stack)):
                     scope_stack.pop()
                 if(len(scope_stack) > 0):
                     scope = scope_stack[-1]
-                parenthesis_stack.pop()
+                if(len(parenthesis_stack) > 0):
+                    parenthesis_stack.pop()
                 level -= 1
 
             for identifier in identifiers:
                 if(identifier == unit):
                     index = identifiers.index(identifier)
 
-                    if(len(identifier_scope[index]) == 0):
-                        identifier_scope[index].append(identifier)
-                        identifier_scope[index].append(str(level) + scope)
+                    # if(len(identifier_scope[index]) == 0):
+                    #     identifier_scope[index].append(identifier)
+                    #     identifier_scope[index].append(str(level) + scope)
 
-                    else:
-                        identifier_scope[index][1] = identifier_scope[index][1] + \
-                            " " + str(level) + scope
+                    # else:
+                    identifier_scope[index][1] = identifier_scope[index][1] + \
+                        " " + str(level) + scope
 
             for method_call in method_calls:
                 if(method_call == unit):
                     index = method_calls.index(method_call)
 
-                    if(len(method_calls_scope[index]) == 0):
-                        method_calls_scope[index].append(method_call)
-                        method_calls_scope[index].append(str(level) + scope)
+                    # if(len(method_calls_scope[index]) == 0):
+                    #     method_calls_scope[index].append(method_call)
+                    #     method_calls_scope[index].append(str(level) + scope)
 
-                    else:
-                        method_calls_scope[index][1] = method_calls_scope[index][1] + " " + str(
-                            level) + scope
+                    # else:
+                    method_calls_scope[index][1] = method_calls_scope[index][1] + " " + str(
+                        level) + scope
 
     return identifier_scope, method_calls_scope
