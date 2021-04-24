@@ -2,7 +2,7 @@ import os
 import Config
 import csv
 def writeToFile(codeBlocks):
-    mode = 'a' if os.path.exists(Config.outputPath) else 'w'
+    mode = 'w'
     with open(Config.outputPath, mode) as f:
         for codeBlockId in codeBlocks:
             codeBlock = codeBlocks[codeBlockId]
@@ -15,7 +15,17 @@ def writeToFile(codeBlocks):
             tokensList = "\nTokensList : "
             for tokenVar in codeBlock["Tokens"]:
                 tokensList += tokenVar + ":" + str(codeBlock["Tokens"][tokenVar]) + ","
+            # variablesList = "\nVariables List : "
+            # for variable in codeBlock["Variables_Scope"]:
+            #     variablesList +=  str(variable[0]) + ":" + str(variable[1]) + "\n"
+
+            # methodList = "\nMethod List: "
+            # for tokenVar in codeBlock["Method_Calls_Scope"]:
+            #     methodList += str(tokenVar[0]) + ":" + str(tokenVar[1]) + "\n"
+
             writeToFile += tokensList + "\n"
+            # writeToFile += variablesList + "\n"
+            # writeToFile += methodList + "\n"
             if Config.outputLevel < 2:
                 writeToFile += "\nCode : \n"+ "\n".join(codeBlock["Code"])
             writeToFile += "\n" + "="*150 + "\n"
@@ -38,7 +48,7 @@ def writeToFile(codeBlocks):
             f.write(writeToFile)
         f.close()
 def writeToCSV(codeBlocks):
-    mode = 'a' if os.path.exists(Config.outputCSVPath) else 'w'
+    mode = 'w'
     with open(Config.outputCSVPath, mode, newline='') as f:
         csv_writer = csv.writer(f)
 
@@ -55,6 +65,11 @@ def writeToCSV(codeBlocks):
                 codeCloneBlockFileName = codeCloneBlock["FileInfo"].split("\\")[-1]
                 codeCloneBlockStart = str(codeCloneBlock["Start"])
                 codeCloneBlockEnd = str(codeCloneBlock["End"])
+
+                # codeCloneSimilarity = codeCloneBlockData["Similarity"]
+                # simi = str(codeCloneSimilarity[0])
+                # simi2 = str(codeCloneSimilarity[1])
+                # simi3 = str(codeCloneSimilarity[2])
                 csv_writer.writerow([currCodeBlockFileName, currCodeBlockStart, currCodeBlockEnd, codeCloneBlockFileName, codeCloneBlockStart, codeCloneBlockEnd])
         
         f.close()

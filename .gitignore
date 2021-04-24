@@ -1,5 +1,5 @@
 __pycache__
 test.py
-output.txt
-clonesFromDB.csv
-clonesDetected.csv
+*.csv
+*.txt
+.vscode/

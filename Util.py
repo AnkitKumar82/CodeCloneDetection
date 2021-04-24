@@ -21,3 +21,19 @@ def getMostFrequent(dict_freq, threshold=1):
             break
         lst_token.append(lst_token_freq[idx][0])
     return lst_token
+
+def compareTwoBlocksInfo(info_lst = []):
+    firstFileInfo = info_lst[0]
+    firstStart = info_lst[1]
+    firstEnd = info_lst[2]
+
+    secondFileInfo = info_lst[3]
+    secondStart = info_lst[4]
+    secondEnd = info_lst[5]
+    if firstFileInfo < secondFileInfo:
+        return True
+    elif firstFileInfo == secondFileInfo and firstStart < secondStart:
+        return True
+    elif firstFileInfo == secondFileInfo and firstStart == secondStart and firstEnd < secondEnd:
+        return True
+    return False

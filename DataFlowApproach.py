@@ -43,7 +43,6 @@ def stringMatching(str1, str2):
 
 def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[], clonesInfo=[]):
     #m1_v_scope = [["n", "1global 2iteration 1global"], ["temp",]]
-    dataFlowSimilaritythreshold = 0.6
     clone_count_variables, total_count_variables = 0, max(
         len(m1_v_scope), len(m2_v_scope))
     clone_count_method_calls, total_count_method_calls = 0, max(

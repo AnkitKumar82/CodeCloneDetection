@@ -21,7 +21,7 @@ def getAllFilesUsingFolderPath(folderPath):
     return allFilesInFolder
 
 
-path = "F:/8th-Sem-Project/BigCloneEval/ijadataset/bcb_reduced/4/sample"
+path = "E:/DatasetOld/path/7/sample"
 allFilesInFolder = getAllFilesUsingFolderPath(path)
 allFilesString = "("
 for i in range(len(allFilesInFolder)):
@@ -32,18 +32,28 @@ for i in range(len(allFilesInFolder)):
 
 allFilesString += ')'
 conn = jaydebeapi.connect("org.h2.Driver",  # driver class
-                          "jdbc:h2:file:F:/8th-Sem-Project/BigCloneEval/bigclonebenchdb/bcb",  # JDBC url
+                          "jdbc:h2:file:E:/DatasetOld/bcb",  # JDBC url
                           ["sa", ""],  # credentials
-                          "F:\8th-Sem-Project\src\CodeCloneDetection\h2-1.4.200.jar",)  # location of H2 jar
+                          "E:\CodeCloneDetection\h2-1.4.200.jar",)  # location of H2 jar
 
 curs = conn.cursor()
+# query = """SELECT T1.NAME , T1.STARTLINE, T1.ENDLINE, T2.NAME, T2.STARTLINE, T2.ENDLINE
+# FROM CLONES AS C1 , FUNCTIONS AS T1, FUNCTIONS AS T2
+# WHERE T1.ID = C1.FUNCTION_ID_ONE
+# AND T1.NAME IN {fileList}
+# AND T2.NAME IN {fileList}
+# AND T2.ID = C1.FUNCTION_ID_TWO;""".format(fileList=allFilesString)
+
 query = """SELECT T1.NAME , T1.STARTLINE, T1.ENDLINE, T2.NAME, T2.STARTLINE, T2.ENDLINE
 FROM CLONES AS C1 , FUNCTIONS AS T1, FUNCTIONS AS T2
 WHERE T1.ID = C1.FUNCTION_ID_ONE
 AND T1.NAME IN {fileList}
 AND T2.NAME IN {fileList}
-AND T2.ID = C1.FUNCTION_ID_TWO;""".format(fileList=allFilesString)
+AND T2.ID = C1.FUNCTION_ID_TWO
+AND C1.SIMILARITY_TOKEN > 0.6;""".format(fileList=allFilesString)
+
 print("Query executing")
+
 curs.execute(query)
 print("Saving to CSV")
 with open('clonesFromDB.csv', 'w', newline='') as csv_f:

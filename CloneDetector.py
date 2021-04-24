@@ -18,7 +18,6 @@ def detectClone(codeBlocks):
             dict_variables, Config.variableAndMethodsThreshold)
         methods_lst = Util.getMostFrequent(
             dict_methods, Config.variableAndMethodsThreshold)
-
         # print("identifiers ", variables_lst)
         # print("methods ", methods_lst)
         variable_scope, method_calls_scope = DataFlowApproach.dataFlowGenerator(
@@ -40,14 +39,15 @@ def detectClone(codeBlocks):
         codeCloneIds = []
 
         for codeCandidateId in codeBlocks:
-            if codeCandidateId == codeBlockId:
+            codeCandidateBlock = codeBlocks[codeCandidateId]
+
+            if codeCandidateId == codeBlockId or Util.compareTwoBlocksInfo([str(codeBlock["FileInfo"]), str(codeBlock["Start"]), str(codeBlock["End"]),str(codeCandidateBlock["FileInfo"]), str(codeCandidateBlock["Start"]), str(codeCandidateBlock["End"])]) == False:
                 continue
 
             simTokens = similarity(
                 tokens, codeBlocks[codeCandidateId]["Tokens"])
-            if simTokens >= Config.tokenSimilarityThreshold:
+            if simTokens >= Config.tokenSimilarityThreshold and min(len(codeCandidateBlock["Method_Calls_Scope"]),len(method_calls_scope))/max(len(codeCandidateBlock["Method_Calls_Scope"]),len(method_calls_scope)) >= Config.methodCallsSimilarityThreshold:
                 # We will check the control flow of variables here
-                codeCandidateBlock = codeBlocks[codeCandidateId]
                 candidate_variable_scope = codeCandidateBlock["Variables_Scope"]
                 candidate_method_calls_scope = codeCandidateBlock["Method_Calls_Scope"]
                 # print("Variables Scope", variable_scope)
