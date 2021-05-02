@@ -5,13 +5,19 @@ import re
 import GetFunctions
 
 
-def extractMethodsAllFiles(listOfFiles):
+def extractCodeBlocksAllFiles(listOfFiles):
     allFilesMethodsBlocks = {}
     blocksSoFar = 0
+    totalLineCount = 0
     for filePath in listOfFiles:
-        file = open(filePath, 'r', encoding='utf-8')
-        originalCode = file.readlines()
-        file.close()
+        try:
+            file = open(filePath, 'r', encoding='utf-8')
+            originalCode = file.readlines()
+            file.close()
+        except:
+            continue
+        if len(originalCode) == 0:
+            continue
         if Config.granularity == 1:
             codeBlocks = methodLevelBlocks(originalCode)
         else:
@@ -21,9 +27,11 @@ def extractMethodsAllFiles(listOfFiles):
         for codeBlock in codeBlocks:
             if len(codeBlock) == 0:
                 continue
+            totalLineCount += len(codeBlock["Code"])
             codeBlock.update({"FileInfo": filePath})
             blocksSoFar += 1
             allFilesMethodsBlocks["CodeBlock" + str(blocksSoFar)] = codeBlock
+    print("Total Line count in whole folder : ", totalLineCount)
     return allFilesMethodsBlocks
 
 

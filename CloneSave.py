@@ -70,6 +70,9 @@ def writeToCSV(codeBlocks):
                 # simi = str(codeCloneSimilarity[0])
                 # simi2 = str(codeCloneSimilarity[1])
                 # simi3 = str(codeCloneSimilarity[2])
-                csv_writer.writerow([currCodeBlockFileName, currCodeBlockStart, currCodeBlockEnd, codeCloneBlockFileName, codeCloneBlockStart, codeCloneBlockEnd])
-        
+                if Config.granularity == 0:
+                    csv_writer.writerow([currCodeBlockFileName, codeCloneBlockFileName])
+                else:
+                    csv_writer.writerow([currCodeBlockFileName, currCodeBlockStart, currCodeBlockEnd, codeCloneBlockFileName, codeCloneBlockStart, codeCloneBlockEnd])
+
         f.close()

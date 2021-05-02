@@ -36,17 +36,21 @@ def detectClone(codeBlocks):
         variable_scope = codeBlock["Variables_Scope"]
         method_calls_scope = codeBlock["Method_Calls_Scope"]
 
+        lenCurr = (codeBlock["End"] - codeBlock["Start"] + 1)
+
         codeCloneIds = []
 
         for codeCandidateId in codeBlocks:
             codeCandidateBlock = codeBlocks[codeCandidateId]
-
-            if codeCandidateId == codeBlockId or Util.compareTwoBlocksInfo([str(codeBlock["FileInfo"]), str(codeBlock["Start"]), str(codeBlock["End"]),str(codeCandidateBlock["FileInfo"]), str(codeCandidateBlock["Start"]), str(codeCandidateBlock["End"])]) == False:
+            lenCandidate = (codeCandidateBlock["End"] - codeCandidateBlock["Start"] + 1)
+            if codeCandidateId == codeBlockId or abs(lenCandidate - lenCurr)/max(lenCandidate, lenCurr) > 0.5 or str(codeBlock["FileInfo"]) == str(codeCandidateBlock["FileInfo"])  or Util.compareTwoBlocksInfo([str(codeBlock["FileInfo"]), str(codeBlock["Start"]), str(codeBlock["End"]),str(codeCandidateBlock["FileInfo"]), str(codeCandidateBlock["Start"]), str(codeCandidateBlock["End"])]) == False:
                 continue
+            # if codeCandidateId == codeBlockId or Util.compareTwoBlocksInfo([str(codeBlock["FileInfo"]), str(codeBlock["Start"]), str(codeBlock["End"]),str(codeCandidateBlock["FileInfo"]), str(codeCandidateBlock["Start"]), str(codeCandidateBlock["End"])]) == False:
+                # continue
 
             simTokens = similarity(
                 tokens, codeBlocks[codeCandidateId]["Tokens"])
-            if simTokens >= Config.tokenSimilarityThreshold and min(len(codeCandidateBlock["Method_Calls_Scope"]),len(method_calls_scope))/max(len(codeCandidateBlock["Method_Calls_Scope"]),len(method_calls_scope)) >= Config.methodCallsSimilarityThreshold:
+            if simTokens >= Config.tokenSimilarityThreshold and max(len(codeCandidateBlock["Method_Calls_Scope"]),len(method_calls_scope)) > 0 and min(len(codeCandidateBlock["Method_Calls_Scope"]),len(method_calls_scope))/max(len(codeCandidateBlock["Method_Calls_Scope"]),len(method_calls_scope)) >= Config.methodCallsSimilarityThreshold:
                 # We will check the control flow of variables here
                 candidate_variable_scope = codeCandidateBlock["Variables_Scope"]
                 candidate_method_calls_scope = codeCandidateBlock["Method_Calls_Scope"]

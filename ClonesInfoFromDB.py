@@ -3,10 +3,9 @@ import os
 import sys
 import csv
 
-
 def getAllFilesUsingFolderPath(folderPath):
     allFilesInFolder = []
-    maxCount = 100
+    maxCount = 100000
     currentCount = 0
     if os.path.exists(folderPath):
         fileNames = os.listdir(folderPath)
@@ -21,7 +20,10 @@ def getAllFilesUsingFolderPath(folderPath):
     return allFilesInFolder
 
 
-path = "E:/DatasetOld/path/7/sample"
+path = "E:/Dataset/path/39/selected"
+csvFilePath = "clonesFromDB39.csv"
+
+
 allFilesInFolder = getAllFilesUsingFolderPath(path)
 allFilesString = "("
 for i in range(len(allFilesInFolder)):
@@ -32,7 +34,7 @@ for i in range(len(allFilesInFolder)):
 
 allFilesString += ')'
 conn = jaydebeapi.connect("org.h2.Driver",  # driver class
-                          "jdbc:h2:file:E:/DatasetOld/bcb",  # JDBC url
+                          "jdbc:h2:file:E:/Dataset/bcb",  # JDBC url
                           ["sa", ""],  # credentials
                           "E:\CodeCloneDetection\h2-1.4.200.jar",)  # location of H2 jar
 
@@ -50,13 +52,14 @@ WHERE T1.ID = C1.FUNCTION_ID_ONE
 AND T1.NAME IN {fileList}
 AND T2.NAME IN {fileList}
 AND T2.ID = C1.FUNCTION_ID_TWO
-AND C1.SIMILARITY_TOKEN > 0.6;""".format(fileList=allFilesString)
+AND C1.SIMILARITY_LINE >= 0.7
+AND C1.SIMILARITY_TOKEN >= 0.7;""".format(fileList=allFilesString)
 
 print("Query executing")
 
 curs.execute(query)
 print("Saving to CSV")
-with open('clonesFromDB.csv', 'w', newline='') as csv_f:
+with open(csvFilePath, 'w', newline='') as csv_f:
     csv_writer = csv.writer(csv_f)
     for value in curs.fetchall():
         # the values are returned as wrapped java.lang.Long instances

@@ -62,7 +62,7 @@ def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[], 
         # print("Variable 1 ", m1_v_scope[i])
         # print("Variable 2 ", m2_v_scope[j])
         # print("Clones Info ", clonesInfo)
-        if min(v_len1, v_len2) / max(v_len1, v_len2) >= Config.dataFlowSimilaritythreshold:
+        if max(v_len1, v_len2) > 0 and min(v_len1, v_len2) / max(v_len1, v_len2) >= Config.dataFlowSimilaritythreshold:
             similarity = stringMatching(m1_v_scope[i][1], m2_v_scope[j][1])
 
             if(similarity >= Config.dataFlowSimilaritythreshold):
@@ -82,7 +82,7 @@ def getSimilarity(m1_v_scope=[], m1_mc_scope=[], m2_v_scope=[], m2_mc_scope=[], 
         mc_len1 = len(m1_mc_scope[i][1].split())
         mc_len2 = len(m2_mc_scope[j][1].split())
 
-        if min(mc_len1, mc_len2) / max(mc_len1, mc_len2) >= Config.dataFlowSimilaritythreshold:
+        if max(mc_len1, mc_len2) > 0 and min(mc_len1, mc_len2) / max(mc_len1, mc_len2) >= Config.dataFlowSimilaritythreshold:
             similarity = stringMatching(m1_mc_scope[i][1], m2_mc_scope[j][1])
 
             if similarity >= Config.dataFlowSimilaritythreshold:
